@@ -150,7 +150,7 @@ export default function StudentAITransparencyForm() {
               />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-[#0055A2]">AI Transparency Declaration</CardTitle>
+              <CardTitle className="text-2xl font-bold text-[#0055A2]">SAID — Student AI Disclosure</CardTitle>
               <p className="text-gray-600 mt-3">Document your use of AI tools for academic assignments</p>
             </div>
           </div>

@@ -17,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AI Transparency Declaration",
-  description: "AI Transparency Declaration by SJSU",
+  title: "SAID — Student AI Disclosure",
+  description: "SAID — Student AI Disclosure by SJSU",
   icons: {
     icon: "/favicon.svg",
   },
