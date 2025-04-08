@@ -57,6 +57,7 @@ interface CertificateData {
   courseCode: string;
   instructorName: string;
   aiTools: AITool[];
+  chatLinks?: string;
   submissionId: string;
   timestamp: string;
   additionalComments?: string;
@@ -183,6 +184,25 @@ export const generateStudentCertificate = (data: CertificateData) => {
         cellPadding: 5
       }
     });
+    
+    // Add AI Chat Links Section (if provided)
+    if (data.chatLinks) {
+      doc.autoTable({
+        startY: doc.previousAutoTable.finalY + 10,
+        head: [['AI Chat Links']],
+        body: [[data.chatLinks]],
+        theme: 'grid',
+        headStyles: {
+          fillColor: '#0055A2',
+          textColor: '#FFFFFF',
+          fontStyle: 'bold'
+        },
+        styles: {
+          fontSize: 10,
+          cellPadding: 5
+        }
+      });
+    }
     
     // Add Additional Comments Section (if provided)
     if (data.additionalComments) {

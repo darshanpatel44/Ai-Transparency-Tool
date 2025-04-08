@@ -25,6 +25,7 @@ interface FormData {
     purpose: string;
     settings: string;
   }>;
+  chatLinks: string;
   additionalComments: string;
   declaration: boolean;
 }
@@ -77,6 +78,7 @@ export default function StudentAITransparencyForm() {
       purpose: '',
       settings: ''
     }],
+    chatLinks: '',
     additionalComments: '',
     declaration: false
   });
@@ -129,6 +131,7 @@ export default function StudentAITransparencyForm() {
       courseCode: formData.courseCode,
       instructorName: formData.instructorName,
       aiTools: formData.aiTools,
+      chatLinks: formData.chatLinks,
       additionalComments: formData.additionalComments,
       submissionId,
       timestamp
@@ -357,6 +360,31 @@ export default function StudentAITransparencyForm() {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             Add Another AI Tool
           </Button>
+        </div>
+
+        {/* AI Chat Links Section */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            <h3 className="text-lg font-semibold text-[#0055A2]">AI Chat Links</h3>
+          </div>
+          <div className="bg-white p-5 rounded-lg border border-[#E5E7EB] shadow-sm">
+            <div className="space-y-2">
+              <Label htmlFor="chatLinks" className="font-medium">Share AI Conversation Links</Label>
+              <Textarea
+                id="chatLinks"
+                name="chatLinks"
+                value={formData.chatLinks}
+                onChange={handleInputChange}
+                placeholder="Paste links to your AI conversations (e.g., ChatGPT shared links, Claude conversation links, etc.)"
+                className="min-h-[100px] resize-y border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] rounded-md"
+              />
+              <p className="text-sm text-gray-500 mt-1">Add one link per line. These links will help instructors verify your AI interactions.</p>
+            </div>
+          </div>
         </div>
 
         {/* Additional Comments Section */}
