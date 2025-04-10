@@ -457,7 +457,7 @@ export default function StudentAITransparencyForm() {
                   <Textarea
                     value={tool.settings}
                     onChange={(e) => handleAIToolChange(index, 'settings', e.target.value)}
-                    placeholder="share any specific settings or chat history links used..."
+                    placeholder="Share any specific settings or chat history links used..."
                     className="min-h-[80px] resize-y border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] rounded-md"
                   />
                 </div>
