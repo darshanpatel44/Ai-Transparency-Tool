@@ -12,6 +12,7 @@ import { generateStudentCertificate } from '@/lib/generateStudentCertificate';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { DropdownChecklist } from '@/components/ui/dropdown-checklist';
 
 interface FormData {
   studentId: string;
@@ -22,12 +23,18 @@ interface FormData {
   aiTools: Array<{
     toolName: string;
     aiType: string;
-    purpose: string;
+    purpose: string[];
     settings: string;
   }>;
-  chatLinks: string;
   additionalComments: string;
   declaration: boolean;
+}
+
+interface FormErrors {
+  studentInfo: boolean;
+  assignmentInfo: boolean;
+  aiTools: boolean;
+  aiToolsDetails: boolean[];
 }
 
 const aiToolOptions = [
@@ -54,15 +61,13 @@ const aiToolOptions = [
   ];
   
   const purposeOptions = [
-    { value: 'research', label: 'Background Research' },
-    { value: 'brainstorming', label: 'Idea Generation' },
-    { value: 'drafting', label: 'Initial Drafting' },
-    { value: 'editing', label: 'Proofreading/Editing' },
-    { value: 'coding', label: 'Code Implementation' },
-    { value: 'debugging', label: 'Error Debugging' },
-    { value: 'visualization', label: 'Data Visualization' },
-    { value: 'design', label: 'Graphic Design' },
-    { value: 'other', label: 'Other' }
+    { value: 'writer_block', label: 'To get started or overcome writer\'s block' },
+    { value: 'first_draft', label: 'To generate a first draft or outline' },
+    { value: 'improve_grammar', label: 'To improve grammar, clarity, or tone' },
+    { value: 'explore_ideas', label: 'To explore multiple perspectives or ideas' },
+    { value: 'paraphrase', label: 'To paraphrase or rephrase my own writing' },
+    { value: 'summarize', label: 'To summarize or explain complex content' },
+    { value: 'create_media', label: 'To create media or visuals for the assignment' }
   ];
 
 export default function StudentAITransparencyForm() {
@@ -75,13 +80,21 @@ export default function StudentAITransparencyForm() {
     aiTools: [{
       toolName: '',
       aiType: '',
-      purpose: '',
+      purpose: [],
       settings: ''
     }],
-    chatLinks: '',
     additionalComments: '',
     declaration: false
   });
+  
+  const [errors, setErrors] = useState<FormErrors>({
+    studentInfo: false,
+    assignmentInfo: false,
+    aiTools: false,
+    aiToolsDetails: [false]
+  });
+  
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -104,11 +117,31 @@ export default function StudentAITransparencyForm() {
       };
     });
   };
+  
+  const handlePurposeChange = (index: number, values: string[]) => {
+    setFormData(prev => {
+      const newAiTools = [...prev.aiTools];
+      newAiTools[index] = {
+        ...newAiTools[index],
+        purpose: values
+      };
+      
+      return {
+        ...prev,
+        aiTools: newAiTools
+      };
+    });
+  };
 
   const addAITool = () => {
     setFormData(prev => ({
       ...prev,
-      aiTools: [...prev.aiTools, { toolName: '', aiType: '', purpose: '', settings: '' }]
+      aiTools: [...prev.aiTools, { toolName: '', aiType: '', purpose: [], settings: '' }]
+    }));
+    
+    setErrors(prev => ({
+      ...prev,
+      aiToolsDetails: [...prev.aiToolsDetails, false]
     }));
   };
 
@@ -117,10 +150,55 @@ export default function StudentAITransparencyForm() {
       ...prev,
       aiTools: prev.aiTools.filter((_, i) => i !== index)
     }));
+    
+    setErrors(prev => ({
+      ...prev,
+      aiToolsDetails: prev.aiToolsDetails.filter((_, i) => i !== index)
+    }));
   };
 
+  const validateForm = () => {
+    setFormSubmitted(true);
+    
+    // Check student information
+    const studentInfoValid = !!formData.studentId && !!formData.studentName;
+    
+    // Check assignment information
+    const assignmentInfoValid = !!formData.assignmentTitle && !!formData.courseCode && !!formData.instructorName;
+    
+    // Check if at least one AI tool is properly filled
+    const aiToolsDetailsValid = formData.aiTools.map(tool => 
+      !!tool.toolName && !!tool.aiType && tool.purpose.length > 0
+    );
+    
+    // Check if at least one AI tool is valid
+    const atLeastOneAiToolValid = aiToolsDetailsValid.some(isValid => isValid);
+    
+    setErrors({
+      studentInfo: !studentInfoValid,
+      assignmentInfo: !assignmentInfoValid,
+      aiTools: !atLeastOneAiToolValid,
+      aiToolsDetails: aiToolsDetailsValid.map(isValid => !isValid)
+    });
+    
+    return studentInfoValid && assignmentInfoValid && atLeastOneAiToolValid;
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      // Scroll to the first error
+      if (errors.studentInfo) {
+        document.getElementById('studentId')?.scrollIntoView({ behavior: 'smooth' });
+      } else if (errors.assignmentInfo) {
+        document.getElementById('assignmentTitle')?.scrollIntoView({ behavior: 'smooth' });
+      } else if (errors.aiTools) {
+        document.querySelector('.ai-tools-section')?.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+    
     const timestamp = new Date().toLocaleString();
     const submissionId = `${formData.studentId}-${Date.now()}`;
     
@@ -131,7 +209,6 @@ export default function StudentAITransparencyForm() {
       courseCode: formData.courseCode,
       instructorName: formData.instructorName,
       aiTools: formData.aiTools,
-      chatLinks: formData.chatLinks,
       additionalComments: formData.additionalComments,
       submissionId,
       timestamp
@@ -161,9 +238,34 @@ export default function StudentAITransparencyForm() {
         <CardContent className="pt-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-6">
-        
+              
+              {/* Informational Banner */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-800">This tool empowers you to transparently document your use of AI tools in academic assignments. The <span className="font-bold">easy-to-use</span> templates and prompts guide you in disclosing how, when, and why AI was utilized, ensuring alignment with your instructor’s guidelines and institutional policies. Customize your disclosure with checkboxes, text fields, and optional reflections to clarify your process. Refer to <a href="https://docs.google.com/document/d/1XjSmMeGR98jHjyTyl4XawSxEgAQDPaDHKY-WP5f6QKw/edit?usp=sharing" className="text-blue-600 hover:underline">the SAID Guide</a> for tips on ethical AI use and best practices.</p>
+                  </div>
+                </div>
+              </div>
+              
         {/* Student Information */}
         <div className="mb-6">
+          {errors.studentInfo && formSubmitted && (
+            <Alert className="mb-4 border-red-400 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-600">Missing Information</AlertTitle>
+              <AlertDescription className="text-red-600">
+                Please fill in all required student information fields.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex items-center gap-2 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -173,7 +275,7 @@ export default function StudentAITransparencyForm() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white p-5 rounded-lg border border-[#E5E7EB] shadow-sm">
             <div className="space-y-2">
-              <Label htmlFor="studentId" className="font-medium">Student ID</Label>
+              <Label htmlFor="studentId" className="font-medium">Student ID <span className="text-red-500">*</span></Label>
               <Input
                 id="studentId"
                 name="studentId"
@@ -184,7 +286,7 @@ export default function StudentAITransparencyForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="studentName" className="font-medium">Full Name</Label>
+              <Label htmlFor="studentName" className="font-medium">Full Name <span className="text-red-500">*</span></Label>
               <Input
                 id="studentName"
                 name="studentName"
@@ -199,6 +301,15 @@ export default function StudentAITransparencyForm() {
 
         {/* Assignment Information */}
         <div className="mb-6">
+          {errors.assignmentInfo && formSubmitted && (
+            <Alert className="mb-4 border-red-400 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-600">Missing Information</AlertTitle>
+              <AlertDescription className="text-red-600">
+                Please fill in all required assignment information fields.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex items-center gap-2 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -211,7 +322,7 @@ export default function StudentAITransparencyForm() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-white p-5 rounded-lg border border-[#E5E7EB] shadow-sm">
             <div className="space-y-2">
-              <Label htmlFor="assignmentTitle" className="font-medium">Assignment Title</Label>
+              <Label htmlFor="assignmentTitle" className="font-medium">Assignment Title <span className="text-red-500">*</span></Label>
               <Input
                 id="assignmentTitle"
                 name="assignmentTitle"
@@ -222,7 +333,7 @@ export default function StudentAITransparencyForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="courseCode" className="font-medium">Course Code</Label>
+              <Label htmlFor="courseCode" className="font-medium">Course Code <span className="text-red-500">*</span></Label>
               <Input
                 id="courseCode"
                 name="courseCode"
@@ -233,7 +344,7 @@ export default function StudentAITransparencyForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="instructorName" className="font-medium">Instructor Name</Label>
+              <Label htmlFor="instructorName" className="font-medium">Instructor Name <span className="text-red-500">*</span></Label>
               <Input
                 id="instructorName"
                 name="instructorName"
@@ -247,7 +358,16 @@ export default function StudentAITransparencyForm() {
         </div>
 
         {/* AI Tools Section */}
-        <div className="space-y-6">
+        <div className="space-y-6 ai-tools-section">
+          {errors.aiTools && formSubmitted && (
+            <Alert className="mb-4 border-red-400 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-600">AI Tool Required</AlertTitle>
+              <AlertDescription className="text-red-600">
+                Please add at least one AI tool with all required fields filled.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex items-center gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2s-2-.9-2-2V4c0-1.1.9-2 2-2z"></path>
@@ -261,7 +381,7 @@ export default function StudentAITransparencyForm() {
           </div>
           
           {formData.aiTools.map((tool, index) => (
-            <div key={index} className="p-6 border border-[#E5E7EB] rounded-lg space-y-5 bg-white shadow-md hover:shadow-lg transition-all">
+            <div key={index} className={`p-6 border ${errors.aiToolsDetails[index] && formSubmitted ? 'border-red-400' : 'border-[#E5E7EB]'} rounded-lg space-y-5 bg-white shadow-md hover:shadow-lg transition-all`}>
               <div className="flex justify-between items-center border-b border-[#E5E7EB] pb-3 mb-2">
                 <h3 className="font-medium text-[#0055A2]">{`AI Tool ${index + 1}`}</h3>
                 {formData.aiTools.length > 1 && (
@@ -279,7 +399,7 @@ export default function StudentAITransparencyForm() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label className="font-medium">Tool Name</Label>
+                  <Label className="font-medium">Tool Name <span className="text-red-500">*</span></Label>
                   <Select
                     value={tool.toolName}
                     onValueChange={(value) => handleAIToolChange(index, 'toolName', value)}
@@ -298,7 +418,7 @@ export default function StudentAITransparencyForm() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-medium">AI Type</Label>
+                  <Label className="font-medium">AI Type <span className="text-red-500">*</span></Label>
                   <Select
                     value={tool.aiType}
                     onValueChange={(value) => handleAIToolChange(index, 'aiType', value)}
@@ -320,30 +440,24 @@ export default function StudentAITransparencyForm() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label className="font-medium">Purpose</Label>
-                  <Select
-                    value={tool.purpose}
-                    onValueChange={(value) => handleAIToolChange(index, 'purpose', value)}
-                    required
-                  >
-                    <SelectTrigger className="w-full border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] h-10 rounded-md">
-                      <SelectValue placeholder="Select Purpose" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {purposeOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label className="font-medium">What were you trying to achieve with AI use? (Select all that apply) <span className="text-red-500">*</span></Label>
+                  <DropdownChecklist
+                    options={purposeOptions}
+                    selectedValues={tool.purpose}
+                    onChange={(values) => handlePurposeChange(index, values)}
+                    placeholder="Select purposes"
+                    className="border border-[#939597] rounded-md"
+                  />
+                  {(tool.purpose.length === 0 && formSubmitted && errors.aiToolsDetails[index]) && (
+                    <p className="text-red-500 text-xs mt-1">Please select at least one purpose</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-medium">Custom Settings/Parameters <span className="text-gray-500 text-sm font-normal">(Optional)</span></Label>
+                  <Label className="font-medium">Custom Settings/Chat Links <span className="text-gray-500 text-sm font-normal">(Optional)</span></Label>
                   <Textarea
                     value={tool.settings}
                     onChange={(e) => handleAIToolChange(index, 'settings', e.target.value)}
-                    placeholder="Enter any specific settings or parameters used..."
+                    placeholder="Enter any specific settings or chat links used..."
                     className="min-h-[80px] resize-y border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] rounded-md"
                   />
                 </div>
@@ -362,30 +476,7 @@ export default function StudentAITransparencyForm() {
           </Button>
         </div>
 
-        {/* AI Chat Links Section */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-            <h3 className="text-lg font-semibold text-[#0055A2]">AI Chat Links</h3>
-          </div>
-          <div className="bg-white p-5 rounded-lg border border-[#E5E7EB] shadow-sm">
-            <div className="space-y-2">
-              <Label htmlFor="chatLinks" className="font-medium">Share AI Conversation Links</Label>
-              <Textarea
-                id="chatLinks"
-                name="chatLinks"
-                value={formData.chatLinks}
-                onChange={handleInputChange}
-                placeholder="Paste links to your AI conversations (e.g., ChatGPT shared links, Claude conversation links, etc.)"
-                className="min-h-[100px] resize-y border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] rounded-md"
-              />
-              <p className="text-sm text-gray-500 mt-1">Add one link per line. These links will help instructors verify your AI interactions.</p>
-            </div>
-          </div>
-        </div>
+
 
         {/* Additional Comments Section */}
         <div className="mb-6">

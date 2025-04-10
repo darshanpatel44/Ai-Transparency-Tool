@@ -26,15 +26,13 @@ const aiTypeOptions = [
 ];
 
 const purposeOptions = [
-  { value: 'research', label: 'Background Research' },
-  { value: 'brainstorming', label: 'Idea Generation' },
-  { value: 'drafting', label: 'Initial Drafting' },
-  { value: 'editing', label: 'Proofreading/Editing' },
-  { value: 'coding', label: 'Code Implementation' },
-  { value: 'debugging', label: 'Error Debugging' },
-  { value: 'visualization', label: 'Data Visualization' },
-  { value: 'design', label: 'Graphic Design' },
-  { value: 'other', label: 'Other' }
+  { value: 'writer_block', label: 'To get started or overcome writer\'s block' },
+  { value: 'first_draft', label: 'To generate a first draft or outline' },
+  { value: 'improve_grammar', label: 'To improve grammar, clarity, or tone' },
+  { value: 'explore_ideas', label: 'To explore multiple perspectives or ideas' },
+  { value: 'paraphrase', label: 'To paraphrase or rephrase my own writing' },
+  { value: 'summarize', label: 'To summarize or explain complex content' },
+  { value: 'create_media', label: 'To create media or visuals for the assignment' }
 ];
 
 // Helper function to get label from value
@@ -46,7 +44,7 @@ const getLabelFromValue = (value: string, options: Array<{value: string, label: 
 interface AITool {
   toolName: string;
   aiType: string;
-  purpose: string;
+  purpose: string[] | string; // Can be array for multiple selections or string for backward compatibility
   settings: string;
 }
 
@@ -57,7 +55,6 @@ interface CertificateData {
   courseCode: string;
   instructorName: string;
   aiTools: AITool[];
-  chatLinks?: string;
   submissionId: string;
   timestamp: string;
   additionalComments?: string;
@@ -165,7 +162,9 @@ export const generateStudentCertificate = (data: CertificateData) => {
     const aiToolsTableBody = data.aiTools.map(tool => [
       getLabelFromValue(tool.toolName, aiToolOptions),
       getLabelFromValue(tool.aiType, aiTypeOptions),
-      getLabelFromValue(tool.purpose, purposeOptions),
+      Array.isArray(tool.purpose)
+        ? tool.purpose.map(p => getLabelFromValue(p, purposeOptions)).join('\n')
+        : getLabelFromValue(tool.purpose, purposeOptions),
       tool.settings || '-'
     ]);
     
@@ -185,24 +184,7 @@ export const generateStudentCertificate = (data: CertificateData) => {
       }
     });
     
-    // Add AI Chat Links Section (if provided)
-    if (data.chatLinks) {
-      doc.autoTable({
-        startY: doc.previousAutoTable.finalY + 10,
-        head: [['AI Chat Links']],
-        body: [[data.chatLinks]],
-        theme: 'grid',
-        headStyles: {
-          fillColor: '#0055A2',
-          textColor: '#FFFFFF',
-          fontStyle: 'bold'
-        },
-        styles: {
-          fontSize: 10,
-          cellPadding: 5
-        }
-      });
-    }
+
     
     // Add Additional Comments Section (if provided)
     if (data.additionalComments) {
