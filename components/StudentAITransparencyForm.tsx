@@ -453,11 +453,11 @@ export default function StudentAITransparencyForm() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-medium">Custom Settings/Chat Links <span className="text-gray-500 text-sm font-normal">(Optional)</span></Label>
+                  <Label className="font-medium">Custom Settings/Chat history Links <span className="text-gray-500 text-sm font-normal">(Optional)</span></Label>
                   <Textarea
                     value={tool.settings}
                     onChange={(e) => handleAIToolChange(index, 'settings', e.target.value)}
-                    placeholder="Enter any specific settings or chat links used..."
+                    placeholder="share any specific settings or chat history links used..."
                     className="min-h-[80px] resize-y border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] rounded-md"
                   />
                 </div>
