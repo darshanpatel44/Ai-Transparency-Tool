@@ -62,12 +62,17 @@ const aiToolOptions = [
   
   const purposeOptions = [
     { value: 'writer_block', label: 'To get started or overcome writer\'s block' },
-    { value: 'first_draft', label: 'To generate a first draft or outline' },
-    { value: 'improve_grammar', label: 'To improve grammar, clarity, or tone' },
-    { value: 'explore_ideas', label: 'To explore multiple perspectives or ideas' },
-    { value: 'paraphrase', label: 'To paraphrase or rephrase my own writing' },
-    { value: 'summarize', label: 'To summarize or explain complex content' },
-    { value: 'create_media', label: 'To create media or visuals for the assignment' }
+    { value: 'first_draft', label: 'To generate a first draft or outline for my assignment' },
+    { value: 'improve_grammar', label: 'To improve or rephrase my writing for grammar, clarity, or tone' },
+    { value: 'explore_ideas', label: 'To explore different perspectives or approaches to the topic' },
+    { value: 'summarize', label: 'To help summarize or better understand complex readings or topics' },
+    { value: 'create_media', label: 'To create or improve images, graphics, or other media for the assignment' },
+    { value: 'coding_help', label: 'To help with coding or debugging tasks' },
+    { value: 'citation_help', label: 'To generate citations or help with reference formatting' },
+    { value: 'translation', label: 'To translate content or improve fluency in English or another language' },
+    { value: 'study_guides', label: 'To create practice questions or study guides' },
+    { value: 'specialized_gpt', label: 'To use a specialized GPT or AI assistant designed for a specific task' },
+    { value: 'other', label: 'Other (please describe)' }
   ];
 
 export default function StudentAITransparencyForm() {
@@ -532,6 +537,19 @@ export default function StudentAITransparencyForm() {
         >
           Generate Certificate
         </Button>
+        
+        <div className="mt-6 bg-gray-100 p-4 rounded-lg border border-gray-200">
+          <p className="text-gray-700 mb-3">
+            Help us improve the SAID by reporting any issues you encounter.
+          </p>
+          <Button
+            variant="outline"
+            className="border-[#E5A823] text-[#E5A823] hover:bg-[#E5A823]/10"
+            onClick={() => window.open('https://forms.gle/7SvKBwvkXfNo4UMh9', '_blank')}
+          >
+            Report an issue
+          </Button>
+        </div>
       </div>
     </form>
         </CardContent>
