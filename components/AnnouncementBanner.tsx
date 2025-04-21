@@ -14,7 +14,7 @@ export default function AnnouncementBanner({ message }: AnnouncementBannerProps)
   useEffect(() => {
     if (messages.length <= 1) return;
     
-    const rotationInterval = 5000; // Time each message is displayed (5 seconds)
+    const rotationInterval = 2500; // Time each message is displayed (5 seconds)
     const fadeTime = 500; // Time for fade transition (0.5 seconds)
     
     const intervalId = setInterval(() => {
