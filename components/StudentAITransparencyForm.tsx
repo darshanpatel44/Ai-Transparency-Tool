@@ -221,7 +221,11 @@ export default function StudentAITransparencyForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-[#0055A2] via-[#939597] to-[#E5A823] flex items-center justify-center p-4">
+    <div 
+      className="min-h-screen bg-gradient-to-r from-[#0055A2] via-[#939597] to-[#E5A823] flex items-center justify-center p-4"
+      role="region"
+      aria-labelledby="form-title"
+    >
       <Card className="max-w-4xl mx-auto shadow-xl border-t-4 border-t-[#0055A2] rounded-xl overflow-hidden">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-white pb-6 border-b">
           <div className="flex items-center gap-4">
@@ -235,7 +239,7 @@ export default function StudentAITransparencyForm() {
               />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-[#0055A2]">SAID — Student AI Disclosure</CardTitle>
+              <CardTitle id="form-title" className="text-2xl font-bold text-[#0055A2]">SAID — Student AI Disclosure</CardTitle>
               <p className="text-gray-600 mt-3">Document your use of AI tools for academic assignments</p>
             </div>
           </div>
@@ -272,13 +276,17 @@ export default function StudentAITransparencyForm() {
             </Alert>
           )}
           <div className="flex items-center gap-2 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0055A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <h3 className="text-lg font-semibold text-[#0055A2]">Student Information</h3>
+            <h3 id="student-info-heading" className="text-lg font-semibold text-[#0055A2]">Student Information</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white p-5 rounded-lg border border-[#E5E7EB] shadow-sm">
+          <div 
+            className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white p-5 rounded-lg border border-[#E5E7EB] shadow-sm"
+            role="group"
+            aria-labelledby="student-info-heading"
+          >
             <div className="space-y-2">
               <Label htmlFor="studentId" className="font-medium">Student ID <span className="text-red-500">*</span></Label>
               <Input
@@ -287,7 +295,9 @@ export default function StudentAITransparencyForm() {
                 value={formData.studentId}
                 onChange={handleInputChange}
                 required
-                className="border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] h-10 rounded-md"
+                aria-required="true"
+                aria-invalid={errors.studentInfo && formSubmitted ? "true" : "false"}
+                className="border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] h-10 rounded-md focus-visible"
               />
             </div>
             <div className="space-y-2">
@@ -298,7 +308,9 @@ export default function StudentAITransparencyForm() {
                 value={formData.studentName}
                 onChange={handleInputChange}
                 required
-                className="border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] h-10 rounded-md"
+                aria-required="true"
+                aria-invalid={errors.studentInfo && formSubmitted ? "true" : "false"}
+                className="border-[#939597] focus:border-[#0055A2] focus:ring-[#0055A2] h-10 rounded-md focus-visible"
               />
             </div>
           </div>
