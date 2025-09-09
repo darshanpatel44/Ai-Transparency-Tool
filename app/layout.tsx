@@ -4,6 +4,7 @@ import "./globals.css";
 import Head from "next/head";
 import { SkipToContent } from "@/components/SkipToContent";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 export const runtime = "edge";
 
@@ -41,7 +42,7 @@ export default function RootLayout({
           {/* @ts-expect-error - SkipToContent is a client component */}
           <SkipToContent />
         </div>
-        
+
         {/* AccessibilityProvider wraps the content to initialize enhancements */}
         {/* @ts-expect-error - AccessibilityProvider is a client component */}
         <AccessibilityProvider>
@@ -50,7 +51,7 @@ export default function RootLayout({
             {children}
           </main>
         </AccessibilityProvider>
-        
+
         {/* Announcer for screen readers */}
         <div
           id="sr-announcer"
@@ -58,6 +59,8 @@ export default function RootLayout({
           aria-atomic="true"
           className="sr-only"
         ></div>
+
+        <Analytics />
       </body>
     </html>
   );
