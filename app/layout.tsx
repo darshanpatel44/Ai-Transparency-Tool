@@ -4,6 +4,7 @@ import "./globals.css";
 import Head from "next/head";
 import { SkipToContent } from "@/components/SkipToContent";
 import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import { Analytics } from "@vercel/analytics/next";
 
 export const runtime = "edge";
@@ -43,14 +44,18 @@ export default function RootLayout({
           <SkipToContent />
         </div>
 
-        {/* AccessibilityProvider wraps the content to initialize enhancements */}
-        {/* @ts-expect-error - AccessibilityProvider is a client component */}
-        <AccessibilityProvider>
-          {/* Main content area with proper landmark */}
-          <main id="main-content" className="min-h-screen">
-            {children}
-          </main>
-        </AccessibilityProvider>
+        {/* PostHogProvider wraps the content for analytics */}
+        {/* @ts-expect-error - PostHogProvider is a client component */}
+        <PostHogProvider>
+          {/* AccessibilityProvider wraps the content to initialize enhancements */}
+          {/* @ts-expect-error - AccessibilityProvider is a client component */}
+          <AccessibilityProvider>
+            {/* Main content area with proper landmark */}
+            <main id="main-content" className="min-h-screen">
+              {children}
+            </main>
+          </AccessibilityProvider>
+        </PostHogProvider>
 
         {/* Announcer for screen readers */}
         <div
